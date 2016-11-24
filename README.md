@@ -157,19 +157,27 @@ $(function () {
 
 > 6 内置对象和自定义正则表达式
 - 内置对象
+	- 使用内置日期时间对象
 ```
-// 使用内置日期时间对象
 <input class="form-control"  type="text" placeholder="日期时间" datatype="datetime"  nullMsg="日期时间不能为空!" errMsg="输入的日期时间格式不正确">
+```
 
-// 使用内置的[n,zh,*] 验证长度
+	- 使用内置的[n,zh,*] 验证长度
 // 任意区间的数字
-<input type="text" placeholder="请输入5-6位的数字" datatype="n5-6" />
+```
 
+```
+<input type="text" placeholder="请输入5-6位的数字" datatype="n5-6" />
+```
+
+```
 // 任意区间的中文
 <input type="text" placeholder="请输入5-6位的中文" datatype="zh5-6" />
-
+```
+```
 // 任意区间的字符
 <input type="text" placeholder="请输入5-6位的任意字符" datatype="*5-6" />
+
 ```
 
 - 使用正则表达式
