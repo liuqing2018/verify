@@ -1,0 +1,59 @@
+/*
+    verify插件css
+*/
+.verify-success { border: 1px solid green !important; }
+.verify-error {
+    position: absolute;
+    top: 0;
+    display: inline-block;
+    float: none;
+    min-width: 100px;
+    padding: 5px 10px;
+    margin:0;
+    white-space:nowrap;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 20px;
+    color: #fff;
+    background-color:rgba(0,0,0,0.7);
+    text-align: left;
+    border: none;
+    outline: none;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    z-index: 6;
+}
+.verify-right { margin-left: 5px; }
+.verify-error-b{
+    border: 1px solid red !important;
+}
+.verify-error .verify-error-icon {
+    position: absolute ;
+    left: 10px ;
+    bottom: -4px ;  /*-5*/
+    float: none;
+    margin: 0;
+    padding: 0;
+    width: 0 !important;
+    height: 0 !important;
+    border-top: 5px solid rgba(0,0,0,0.7) ;
+    border-right: 5px solid transparent ;
+    border-bottom: none;
+    border-left: 5px solid transparent ;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+}
+.verify-right .verify-error-icon{
+    top: 50%;
+    left: -4px; /*-5*/
+    border-top: 5px solid transparent;
+    border-right: 5px solid rgba(0,0,0,0.7);
+    border-bottom: 5px solid transparent ;
+    border-left: none;
+    transform: translateY(-50%) ;
+    -webkit-transform: translateY(-50%) ;
+    -moz-transform: translateY(-50%) ;
+    -o-transform: translateY(-50%);
+}

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>验证测试</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/verify.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        .wrap {
+            width: 600px;
+            margin: 0 auto;
+        }
+        .need {
+            font-style: normal;
+            color: red;
+            margin-right: 2px;
+        }
+        .need:before {
+            content: "*";
+        }
+        ul {
+            list-style: none;
+            /*border:1px solid ;*/
+            /*width: 300px;*/
+        }
+        li {
+            margin: 20px 0;
+        }
+        label {
+            width: 100px;
+        }
+        .form-input {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <form class="form-inline"  role="form" id="myForm">
+        <ul class="clearfix" >
+            <li class="form-group col-md-12">
+                <label><i class="need"></i>用户名</label>
+                <div class="form-input">
+                    <input class="form-control" type="text" placeholder="请输入用户名" name="username" datatype="/^\d{5,19}$/" nullMsg="用户名不能为空!" errMsg="输入的用户名格式不正确" ajaxErrMsg="用户已经存在了" ajaxUrl="data/user.json">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label><i class="need"></i>密码</label>
+                <div class="form-input">
+                    <input class="form-control"  type="password" name="password1" placeholder="请输入密码" datatype="*5-6" nullMsg="密码不能为空!" errMsg="输入的密码格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label><i class="need"></i>确认密码</label>
+                <div class="form-input">
+                    <input class="form-control"  type="password" placeholder="请输入确认密码" datatype="*5-6" nullMsg="密码不能为空!" errMsg="输入的密码格式不正确" rechecked="password1" reErrMsg='两次密码必须一致'>
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>真实姓名</label>
+                <div class="form-input">
+                    <!--<input class="form-control"  type="text" placeholder="请输入真实姓名" datatype="zh5-6" nullMsg="真实姓名不能为空!" ignore="ignore" errMsg="输入的真实姓名格式不正确">-->
+                    <input class="form-control"  type="text" placeholder="请输入真实姓名" datatype="zh5-6" nullMsg="真实姓名不能为空!" ignore="ignore" errMsg="输入的真实姓名格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>员工编号</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="请输入员工编号" datatype="/^\d{5,6}$/" ignore="ignore" nullMsg="员工编号不能为空!" errMsg="输入的员工编号格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>电话</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="请输入电话" datatype="phone" nullMsg="电话不能为空!" errMsg="输入的电话格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>邮箱</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="请输入邮箱" datatype="email" nullMsg="邮箱不能为空!" errMsg="输入的邮箱格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>注册日期</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="注册日期" datatype="date" nullMsg="日期不能为空!" errMsg="输入的日期格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12"><i class="need"></i>注册日期应该是服务器端判断，这里是为了做个日期验证</li>
+            <li class="form-group col-md-12">
+                <label>开始日期</label>
+                <div class="form-input">
+                    <!--<input class="form-control"  type="text" placeholder="开始注册日期" datatype="d" startDate="true" nullMsg="开始日期不能为空!" errMsg="输入的开始日期格式不正确">-->
+                    <input class="form-control"  type="text" placeholder="开始注册日期" datatype="date" startDate="myenddate" name="mystartdate" nullMsg="开始日期不能为空!" errMsg="输入的开始日期格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>结束日期</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="结束注册日期" datatype="date" endDate="mystartdate" name="myenddate" nullMsg="结束日期不能为空!" errMsg="输入的结束日期格式不正确">
+                </div>
+            </li>
+
+            <li class="form-group col-md-12">
+                <label>开始日期</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="开始注册日期" datatype="date" startDate="myenddate2" name="mystartdate2" nullMsg="开始日期不能为空!" errMsg="输入的开始日期格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>结束日期</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="结束注册日期" datatype="date" endDate="mystartdate2" name="myenddate2" nullMsg="结束日期不能为空!" errMsg="输入的结束日期格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12">
+                <label>日期时间</label>
+                <div class="form-input">
+                    <input class="form-control"  type="text" placeholder="日期时间" datatype="datetime"  nullMsg="日期时间不能为空!" errMsg="输入的日期时间格式不正确">
+                </div>
+            </li>
+            <li class="form-group col-md-12 text-center">
+                <button class="btn btn-primary" id="btnAdd" type="button">添加</button>
+                <button class="btn" type="button">取消</button>
+            </li>
+        </ul>
+
+    </form>
+</div>
+<script src="js/jquery.js"></script>
+<script src="js/verify.js"></script>
+<script type="text/javascript">
+$(function () {
+    var oForm = $('.form-inline');
+    var oBtn = $('#btnAdd');    //提交按钮
+    $.initVerify({      //初始化表单，即添加事件绑定，以便失焦时验证数据
+        elem: oForm,         //要验证元素的区域
+        type: false,        //false:初始化    true:全部验证
+        errorElePos: true,     // true： 错误信息在右边，false：错误信息在上边
+        submitBtn: oBtn,      //提交按钮
+        beforeSubmit: function () {
+            return false
+        }
+    });
+    //如果想要自己控制 提交表单，可以调用isVerify(){
+    /*    ele: oForm,         //要验证元素的区域 可不填
+          errorElePos: true,     // true： 错误信息在右边，false：错误信息在上边
+     }
+    */
+    oBtn.on('click',function(){
+    	console.log('哈哈啥')
+        if($.isVerify()){
+            //这里可以写你的业务
+            //$('#myForm').submit();
+            console.log('哈哈啥')
+        }
+    })
+})
+
+</script>
+</body>
+</html>
