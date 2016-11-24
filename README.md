@@ -164,6 +164,7 @@ $(function () {
 ```
 
 	- 使用内置的[n,zh,*] 验证长度
+	
 // 任意区间的数字
 ```
 
@@ -172,7 +173,7 @@ $(function () {
 ```
 
 ```
-// 任意区间的中文
+
 <input type="text" placeholder="请输入5-6位的中文" datatype="zh5-6" />
 ```
 ```
