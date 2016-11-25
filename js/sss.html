@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="UTF-8">
+    <meta name=”format-detection” content=”telephone=yes”/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="no"/>
+    <!-- 启用360浏览器的极速模式(webkit) -->
+    <meta name="renderer" content="webkit">
+    <!-- 避免IE使用兼容模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 针对手持设备优化，主要是针对一些老的不识别viewport的浏览器，比如黑莓 -->
+    <meta name="HandheldFriendly" content="true">
+    <!-- 微软的老式浏览器 -->
+    <meta name="MobileOptimized" content="320">
+    <!-- uc强制竖屏 -->
+    <meta name="screen-orientation" content="portrait">
+    <!-- QQ强制竖屏 -->
+    <meta name="x5-orientation" content="portrait">
+    <!-- UC强制全屏 -->
+    <meta name="full-screen" content="yes">
+    <!-- QQ强制全屏 -->
+    <meta name="x5-fullscreen" content="true">
+    <!-- UC应用模式 -->
+    <meta name="browsermode" content="application">
+    <!-- QQ应用模式 -->
+    <meta name="x5-page-mode" content="app">
+    <!-- windows phone 点击无高光 -->
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>数据上报-风险数据上报</title>
+    <link rel="icon" href="${ctx}/resources/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="${ctx}/resources/lib/bootstrap/dist/css/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="${ctx}/resources/lib/iconfont/iconfont.css" type="text/css"/>
+    <link rel="stylesheet" href="${ctx}/resources/css/style.min.css" type="text/css"/>
+    <link rel="stylesheet" href="${ctx}/resources/common/directive/tooltip/tooltip.css" type="text/css">
+    <script type="text/javascript" src="${ctx}/resources/lib/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="${ctx}/resources/lib/bootstrap/js/tooltip.js"></script>
+    <script type="text/javascript" src="${ctx}/resources/lib/angular/angular.min.js"></script>
+    <script type="text/javascript" src="${ctx}/resources/modules/app.js"></script>
+    <script type="text/javascript" src="${ctx}/resources/common/directive/tooltip/tooltip.js"></script>
+</head>
+<body ng-controller="riskDataReportCtrl">
+<div class="container-wrap">
+    <div class="container-main">
+        <h3 class="headline">风险数据上报</h3>
+        <form name="frm" id="frm" class="riskdata">
+            <ul class="row form-main">
+                <li class="col-md-6">
+                    <label><i class="need"></i>风险摘要</label>
+                    <div class="form-input">
+                        <input ng-model="riskModel.summary" maxlength="20" type="text" placeholder="输入摘要信息（20字以内）" datatype="*1-20" nullMsg="请输入风险摘要" errMsg="摘要信息必须是20字以内！">
+                    </div>
+                </li>
+                <li class="col-md-6">
+                    <label><i class="need"></i>风险等级</label>
+                    <div class="form-input">
+                        <select ng-model="riskModel.level" datatype="/^\d$/" nullMsg="请选择风险等级" errMsg="风险等级错误！">
+                            <option value="">请选择</option>
+                            <option value="1">低</option>
+                            <option value="2">中</option>
+                            <option value="3">高</option>
+                        </select>
+                    </div>
+                </li>
+                <li class="col-md-12">
+                    <label class="vert-t"><i class="need"></i>风险内容描述</label>
+                    <div class="form-input">
+                        <textarea ng-model="riskModel.detail" datatype="*1-300" nullMsg="请输入风险信息内容描述！" errMsg="风险信息描述必须在300字以内！" placeholder="输入风险内容描述(300字以内)" maxlength="300" ></textarea>
+                    </div>
+                </li>
+                <li class="col-md-12">
+                    <label class="vert-t"><i class="need"></i>建议处理步骤</label>
+                    <div class="form-input">
+                        <textarea ng-model="riskModel.measuers" datatype="*1-300" nullMsg="请输入建议处理步骤！" errMsg="建议处理步骤必须在300字以内！" placeholder="输入建议处理步骤（300字以内）" maxlength="300" ></textarea>
+                    </div>
+                </li>
+            </ul>
+            <div class="mg-t20 text-center">
+                <button class="primary" ng-click="savePop()" type="button">上报</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 保存或者上报弹框 Start -->
+<div class="popup-main ng-cloak" ng-cloak ng-if="popup.isPopup">
+    <div class="popup-bg"></div>
+    <div class="popup-box" style="width: {{popup.width}}px">
+        <div class="popup-header">
+            <p ng-bind="popup.title"></p>
+            <i ng-click="close();" class="icon-close"></i>
+        </div>
+        <div class="popup-content">
+            <p ng-bind="popup.content"></p>
+        </div>
+        <div class="popup-footer text-center">
+            <button class="primary mg-rt20" type="button" ng-click="report();">确定</button>
+            <button class="warning mg-rt20" type="button" ng-click="save();">保存</button>
+            <button class="cancel" type="button" ng-click="close();">取消</button>
+        </div>
+    </div>
+</div>
+<!-- 保存或者上报弹框 End -->
+
+</body>
+</html>
+<script type="text/javascript" src="${ctx}/resources/common/project/verify.js"></script>
+<script type="text/javascript" src="${ctx}/resources/modules/data-report/riskDataReportCtrl.js"></script>

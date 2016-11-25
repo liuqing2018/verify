@@ -180,10 +180,10 @@ $.extend({
                 }
             }
 
-            if (!execTest('*', obj.getNull)) {  //验证空
+            if (!execTest(['*', '-'], getIntervalNumber)) { //验证任意字符的长度
                 return false;
             }
-            if (!execTest(['*', '-'], getIntervalNumber)) { //验证任意字符的长度
+            if (!execTest('*', obj.getNull)) {  //验证空
                 return false;
             }
             if (!execTest(['zh', '-'], getIntervalNumber)) {    //验证中文长度
@@ -268,11 +268,12 @@ $.extend({
         var options = {
             elem: elem,  //要验证的表单元素
             type: params.type || false, //false：初始化 true: 验证全部
+            textarea: params.textarea || false,	//false表示不验证textarea
             errorElePos: params.errorElePos || false //错误提示显示的位置 true为右侧，false为上侧
         };
 
         var input, select;
-        input = $(options.elem).find("input[datatype]");    //获取要验证的元素
+        input = $(options.elem).find(options.textarea ? "input[datatype],textarea[datatype]" : "input[datatype]");	//是否验证textarea
         select = $(options.elem).find("select[datatype]");
         if (!options.type) { //初始化表单元素
             input.unbind("blur", fn); //移除input的blur事件
@@ -281,18 +282,24 @@ $.extend({
                 var result = $.verify({current: this, errorElePos: options.errorElePos}); //验证当前项
                 //TODO put your code here
             };
-            $(options.elem).find("input[datatype]").blur(fn); //绑定blur事件
-            $(options.elem).find("select[datatype]").change(fn); //绑定change事件
+            input.blur(fn); //绑定blur事件
+            select.change(fn); //绑定change事件
 
         } else {
             input.trigger('blur');
             select.trigger('change');
-            var flag = $(options.elem).find(".verify-error-b").length > 0 ? false : true;
-            if (!flag) {
+            console.log('$(options.elem).find(".verify-error-b").length :'+ $(options.elem).find(".verify-error-b").length)
+            console.log($(options.elem).find(".verify-error-b"));
+
+//            var flag = $(options.elem).find(".verify-error-b").length > 0 ? false : true;
+
+            if ($(options.elem).find(".verify-error-b").length>0) {
                 var ele = $('.verify-error-b:first').trigger('blur');
+                console.log($('.verify-error-b:first'))
                 $('.verify-error-b:first').focus();
+                return false;
             }
-            return flag;
+            return true;
         }
     }
 });
