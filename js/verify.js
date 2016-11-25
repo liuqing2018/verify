@@ -253,7 +253,7 @@ $.extend({
     },
     isVerify: function () { //验证全部
         this.params.type = true;
-        this.initVerify(this.params);
+        return this.initVerify(this.params);
     },
     clearVerifyStatus: function (elem) { //清除状态
         elem = elem || document;
@@ -287,7 +287,7 @@ $.extend({
         } else {
             input.trigger('blur');
             select.trigger('change');
-            var flag = $(options.elem).find(".verify-error").length > 0 ? false : true;
+            var flag = $(options.elem).find(".verify-error-b").length > 0 ? false : true;
             if (!flag) {
                 var ele = $('.verify-error-b:first').trigger('blur');
                 $('.verify-error-b:first').focus();
