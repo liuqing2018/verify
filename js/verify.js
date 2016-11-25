@@ -133,19 +133,21 @@ $.extend({
         //验证
         var ignore = $(options.current).attr('ignore'); //如果有表示不是必填项
         if (!(options.dataType.charAt(0) === '/')) {    //使用的是内置规则
-            function getIntervalNumber(str) {	//获取范围的数字
-                var firstNumber = options.dataType.substring(options.dataType.indexOf("-") - 1, options.dataType.indexOf("-")); //获取长度最小值
+            function getIntervalNumber() {	//获取范围的数字
+                var firstNumber = options.dataType.match(/\d+/)[0]; //获取长度最小值
                 var lastNumber = options.dataType.substring(options.dataType.indexOf("-") + 1); //获取长度最大值
-                var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - 1);	//获取验证的类型
+                var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - firstNumber.length);	//获取验证的类型
 
                 if (prefix == 'zh') {
                     regObj["le"] = new RegExp("^[\\u4e00-\\u9fa5]{" + firstNumber + "," + lastNumber + "}$"); //验证中文长度
                 } else if(prefix == 'n') {
                     regObj["le"] = new RegExp("^\\d{" + firstNumber + "," + lastNumber + "}$"); //验证数字长度
+                }else if(prefix == 'r'){
+                    return (parseFloat(value) >= parseFloat(firstNumber) && parseFloat(value) <= parseFloat(lastNumber)) ? true : false;    //比较数字范围
                 }else{
                     regObj["le"] = new RegExp("^\\S{" + firstNumber + "," + lastNumber + "}$"); //验证任意字符长度
                 }
-                return obj.getLength(firstNumber, lastNumber, str)
+                return obj.getLength(firstNumber, lastNumber)
             }
 
             function execTest(str, callback) {
@@ -194,6 +196,9 @@ $.extend({
                 return false;
             }
             if (!execTest('n', obj.getNumber)) {    //验证数字
+                return false;
+            }
+            if (!execTest('r', getIntervalNumber)) {    //验证数字
                 return false;
             }
             if (!execTest('email', obj.getEmail)) { //验证邮箱

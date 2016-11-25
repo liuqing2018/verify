@@ -34,6 +34,7 @@ $.initVerify(); //简单的逻辑只要调用这一句话即可
              "*":  验证空
              "zh": 验证中文
              "n":  验证数字
+             "r":   "验证数字的范围"
              "email":  验证邮箱
              "phone":  验证手机号
              "le": 验证长度
@@ -166,6 +167,8 @@ $(function () {
 // 任意区间的数字
 <input type="text" placeholder="请输入5-6位的数字" datatype="n5-6" />
 
+// 验证数字范围 5-65536之间
+<input type="text" placeholder="请输入5-6位的数字" datatype="r5-65536" />
 
 // 任意区间的中文
 <input type="text" placeholder="请输入5-6位的中文" datatype="zh5-6" />
