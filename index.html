@@ -160,10 +160,7 @@ $(function () {
         elem: oForm,         //要验证元素的区域
         type: false,        //false:初始化    true:全部验证
         errorElePos: true,     // true： 错误信息在右边，false：错误信息在上边
-        submitBtn: oBtn,      //提交按钮
-        beforeSubmit: function () {
-            return false
-        }
+        isAll : false
     });
     //如果想要自己控制 提交表单，可以调用isVerify(){
     /*    ele: oForm,         //要验证元素的区域 可不填

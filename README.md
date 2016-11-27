@@ -5,6 +5,7 @@
 - 支持ajax验证，如检测用户名是否存在，同一个页面支持多个ajax验证
 - 支持开始时间和结束时间比较
 - 支持必填项和选填项校验
+- 支持验证全部和逐条验证
 - 支持在元素上方边或则右边显示错误信息
 
 ### 使用示例
@@ -38,6 +39,8 @@ $.initVerify(); //简单的逻辑只要调用这一句话即可
              "email":  验证邮箱
              "phone":  验证手机号
              "le": 验证长度
+             "url": 验证url地址
+             "ip": 验证ip地址
              "date": 简单验证日期 yyyy-MM-dd
              "time": 简单验证时间  hh:ss:mm
              "datetime": 简单验证日期时间
@@ -61,7 +64,11 @@ $(function () {
     $.initVerify({      //初始化表单，即添加事件绑定，以便失焦时验证数据
         elem: oForm,          // 可选：要验证元素的表单 不填为document
         errorElePos: true,     //可选：默认为false ,true： 错误信息在右边，false：错误信息在上边
+        textarea: false,	//可选：默认为false表示不验证textarea true：验证
+        isAll : false    //可选：默认false  true: 逐个验证  false：全部验证
     });
+
+    elem: elem,  //要验证的表单元素
     
     //提交表单时执行验证
     oBtn.on('click',function(){

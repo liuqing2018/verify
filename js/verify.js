@@ -33,7 +33,7 @@ $.extend({
                 return regObj['*'].test(value);
             },
             getRegFn: function (dataType) { //用内置类型去验证
-                //debugger
+                //debugger;
                 return regObj[dataType].test(value);
             },
             getRechecked: function () { //再次验证
@@ -115,7 +115,7 @@ $.extend({
             }
         };
         //验证
-        //debugger
+        //debugger;
         var ignore = $(options.current).attr('ignore'); //false 必填  true：选填
         if (!(options.dataType.charAt(0) === '/')) {    //使用的是内置规则
             if (options.dataType.indexOf('-') >= 0) {  //如果有 - 则表示是要验证范围
@@ -124,7 +124,7 @@ $.extend({
                 return execTest(options.dataType, obj.getRegFn,options.dataType);
             }
             function getIntervalNumber() {	//获取范围的数字
-                //debugger
+                //debugger;
                 var firstNumber = options.dataType.match(/\d+/)[0]; //获取长度最小值
                 var lastNumber = options.dataType.substring(options.dataType.indexOf("-") + 1); //获取长度最大值
                 var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - firstNumber.length);	//获取验证的类型
@@ -152,73 +152,45 @@ $.extend({
 
             //执行验证
             function execTest(str, callback) {
-                //debugger
+                //debugger;
                 var args = Array.prototype.slice.call(arguments,2); //截取参数
                 if (Object.prototype.toString.call(str) === '[object Array]') { //传递是一个数组
                     return showInfo();
                 } else { //传递是一个字符串 可以直接的调用相对的方法
                     return (options.dataType.indexOf(str) >= 0) ? showInfo() : false;    //如果匹配了传递的字符串 就用用callback 否则就return true 继续查找
                 }
-
                 //显示相关信息
                 function showInfo() {
-                    //debugger
-                    if (!ignore) { //必填项
-                        if(!obj.getNull()){
-                            return obj.error(options.nullMsg);
-                        }else {
-                            return callback.apply(this, args) ? obj.success() : obj.error(options.errMsg);
-                        }
-                    } else {
-                        if (!obj.getNull()) { //空
-                            return obj.success();
-                        } else {
-                            return callback.apply(this,args) ? obj.success() : obj.error(options.errMsg);
-                        }
+                    if(!obj.getNull()){
+                        return !ignore ? obj.error(options.nullMsg): obj.success();
+                    }else {
+                        return callback.apply(this, args) ? obj.success() : obj.error(options.errMsg);
                     }
                 }
             }
         } else {    //自定义正则验证
-            //debugger
+            //debugger;
             options.dataType = eval(options.dataType);
-
-            if (!ignore) {
-                if (!obj.getNull()) { //为空
-                    return obj.error(options.nullMsg);
-                } else {
-                    if(options.dataType.test(value)){
-                        obj.success();
-                        extendVerify()
-                    }else{
-                        obj.error(options.errMsg);
-                    }
-                }
+            if (!obj.getNull()) { //为空
+                return !ignore ? obj.error(options.nullMsg): obj.success();
             } else {
-                if (!obj.getNull()) { //空
-                    return obj.success();
-                } else {
-                    if(options.dataType.test(value)){
-                        obj.success();
-                        extendVerify()
-                    }else{
-                        obj.error(options.errMsg);
-                    }
-                }
+                return options.dataType.test(value) ? extendVerify() :obj.error(options.errMsg);
             }
         }
 
         //验证扩展方法
         function extendVerify() {
-            //debugger
+            //debugger;
             if (options.rechecked) { //二次验证
-                obj.getRechecked(options.current) ? obj.success() : obj.error($(options.current).attr('reErrMsg' || '两次输入不一致！'));
+                return obj.getRechecked(options.current) ? obj.success() : obj.error($(options.current).attr('reErrMsg' || '两次输入不一致！'));
             }
             if (options.ajaxUrl) { //ajax校验
-                obj.getAjaxCheck() ? obj.success() : obj.error($(options.current).attr('ajaxErrMsg'));
+                return obj.getAjaxCheck() ? obj.success() : obj.error($(options.current).attr('ajaxErrMsg'));
             }
             if (options.startDate != undefined || options.endDate != undefined) { // 比较日期
-                obj.getCompareDate(options.current) ? obj.success() : obj.error(options.errMsg || '日期验证失败！');
+                return obj.getCompareDate(options.current) ? obj.success() : obj.error(options.errMsg || '日期验证失败！');
             }
+            return obj.success()
         }
     },
     isVerify: function () { //验证全部
@@ -239,7 +211,8 @@ $.extend({
             elem: elem,  //要验证的表单元素
             type: params.type || false, //false：初始化 true: 验证全部
             textarea: params.textarea || false,	//false表示不验证textarea
-            errorElePos: params.errorElePos || false //错误提示显示的位置 true为右侧，false为上侧
+            errorElePos: params.errorElePos || false, //错误提示显示的位置 true为右侧，false为上侧
+            isAll : params.isAll || false    //默认全部验证 true: 逐个验证  false：全部验证
         };
 
         var input, select;
@@ -249,15 +222,22 @@ $.extend({
             input.unbind("blur", fn); //移除input的blur事件
             select.unbind("change", fn); //移除select的change事件
             var fn = function () {
-                var result = $.verify({current: this, errorElePos: options.errorElePos}); //验证当前项
-                //TODO put your code here
+                return $.verify({current: this, errorElePos: options.errorElePos}); //验证当前项
             };
             input.blur(fn); //绑定blur事件
             select.change(fn); //绑定change事件
-
         } else {
-            input.trigger('blur');
-            select.trigger('change');
+            if(options.isAll){
+                input.each(function (index ,item) {
+                    return $(item).triggerHandler('blur');
+                });
+                select.each(function (index ,item) {
+                    return $(item).triggerHandler('change');
+                });
+            }else{
+                input.trigger('blur');
+                select.trigger('change');
+            }
             if ($(options.elem).find(".verify-error-b").length > 0) {
                 var ele = $('.verify-error-b:first').trigger('blur');
                 $('.verify-error-b:first').focus();
