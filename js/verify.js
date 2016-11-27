@@ -26,15 +26,19 @@ $.extend({
             "datetime": /^([1][7-9][0-9][0-9]|[2][0][0-9][0-9])([\-\.\/\:])([0][1-9]|[1][0-2])([\-\.\/\:])([0][1-9]|[1][0-9]|[2][0-9]|[3][0-1])(\s+)([0-1][0-9]|[2][0-3])([\-\.\/\:])([0-5][0-9])([\-\.\/\:])([0-5][0-9])$/g //验证时间 yyyy-MM-dd hh:ss:mm
         };
 
-        var obj = {
+        var obj = { //验证对象
             getNull: function () { //验证空
                 return regObj['*'].test(value);
+            },
+            getRegFn: function (dataType) { //用内置类型去验证
+                // debugger
+                return regObj[dataType].test(value);
             },
             getRechecked: function () { //再次验证
                 var recheckVal = $('input[name=\'' + options.rechecked + '\']').val().trim(); //要比较的值
                 return recheckVal == value;
             },
-            getAjaxCheck: function (elem) { //ajax验证
+            getAjaxCheck: function () { //ajax验证
                 var name = $(options.current).attr('name') || 'params';
                 $.ajax({
                     type: "GET",
@@ -48,29 +52,11 @@ $.extend({
                     }
                 });
             },
-            getChinese: function () { //验证中文
-                return regObj["zh"].test(value);
-            },
-            getNumber: function () { //验证中文
-                return regObj["n"].test(value);
-            },
-            getEmail: function () { //验证邮箱
-                return regObj["email"].test(value);
-            },
-            getIphone: function () { //验证手机号
-                return regObj["phone"].test(value);
-            },
-            getLength: function (min, max) { //验证任意字符
+            getLength: function () { //验证长度
                 return regObj["le"].test(value);
             },
-            getDate: function () { //验证日期
-                return regObj["date"].test(value);
-            },
-            getTime: function () { //验证时间
-                return regObj["time"].test(value);
-            },
-            getDateTime: function () { //验证日期时间
-                return regObj["datetime"].test(value);
+            getRange : function (min,max) { //验证范围
+                return (Number(value) >= Number(min) && Number(value) <= max) || false;
             },
             getCompareDate: function () { //比较日期
                 var oStartDate = $(options.current).attr('startDate'); //开始日期指定的结束对象
@@ -129,98 +115,65 @@ $.extend({
                 return false;
             }
         };
-
         //验证
+        // debugger
         var ignore = $(options.current).attr('ignore'); //如果有表示不是必填项
         if (!(options.dataType.charAt(0) === '/')) {    //使用的是内置规则
+            if (options.dataType.indexOf('-') >= 0) {  //如果有 - 则表示是要验证范围
+                return getIntervalNumber() ? extendVerify() : false;
+            } else {
+                return execTest(options.dataType, obj.getRegFn,options.dataType);
+            }
             function getIntervalNumber() {	//获取范围的数字
+                // debugger
                 var firstNumber = options.dataType.match(/\d+/)[0]; //获取长度最小值
                 var lastNumber = options.dataType.substring(options.dataType.indexOf("-") + 1); //获取长度最大值
                 var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - firstNumber.length);	//获取验证的类型
 
-                if (prefix == 'zh') {
-                    regObj["le"] = new RegExp("^[\\u4e00-\\u9fa5]{" + firstNumber + "," + lastNumber + "}$"); //验证中文长度
-                } else if(prefix == 'n') {
-                    regObj["le"] = new RegExp("^\\d{" + firstNumber + "," + lastNumber + "}$"); //验证数字长度
-                }else if(prefix == 'r'){
-                    return (parseFloat(value) >= parseFloat(firstNumber) && parseFloat(value) <= parseFloat(lastNumber)) ? true : false;    //比较数字范围
-                }else{
-                    regObj["le"] = new RegExp("^\\S{" + firstNumber + "," + lastNumber + "}$"); //验证任意字符长度
+                //重新构建正则
+                switch (prefix) {
+                    case '*':   //验证任意字符长度 (非空)
+                        regObj["le"] = new RegExp("^\\S{" + firstNumber + "," + lastNumber + "}$");
+                        break;
+                    case 'zh':  //验证中文长度
+                        regObj["le"] = new RegExp("^[\\u4e00-\\u9fa5]{" + firstNumber + "," + lastNumber + "}$");
+                        break;
+                    case 'n':   //验证数字长度
+                        regObj["le"] = new RegExp("^\\d{" + firstNumber + "," + lastNumber + "}$");
+                        break;
+                    case 'r':    //比较数字范围
+                        return execTest([prefix, '-'],obj.getRange,Number(firstNumber), Number(lastNumber));
+                        break;
+                    default:    //验证任意字符长度
+                        regObj["le"] = new RegExp("^\\S{" + firstNumber + "," + lastNumber + "}$");
+                        break;
                 }
-                return obj.getLength(firstNumber, lastNumber)
+                return execTest([prefix, '-'], obj.getRegFn,'le');  //返回的是true或则false
             }
 
+            //执行验证
             function execTest(str, callback) {
+                // debugger
+                var args = Array.prototype.slice.call(arguments,2); //截取参数
                 if (Object.prototype.toString.call(str) === '[object Array]') { //传递是一个数组
-                    var length = str.length;
-                    var num = 0;
-                    for (var i = 0; i < length; i++) {
-                        if (options.dataType.indexOf(str[i]) >= 0) {
-                            num++;
-                        }
-                    }
-                    return num == length ? showIfno() : true;  //等于的时候会验证 否则就返回true
-                } else { //传递是一个字符串
-                    return (options.dataType.indexOf(str) >= 0) ? showIfno() : true;
+                    return showInfo();
+                } else { //传递是一个字符串 可以直接的调用相对的方法
+                    return (options.dataType.indexOf(str) >= 0) ? showInfo() : false;    //如果匹配了传递的字符串 就用用callback 否则就return true 继续查找
                 }
 
-                function showIfno() {
+                //显示相关信息
+                function showInfo() {
+                    // debugger
                     if (!ignore) { //必填项
-                        if (!obj.getNull()) {
-                            return obj.error(options.nullMsg || '不能为空！');
-                        }
-                        return callback() ? obj.success() : obj.error(options.errMsg);
+                        return callback(args) ? obj.success() : obj.error(options.errMsg);
                     } else {
                         if (!obj.getNull()) { //空
                             return obj.success();
                         } else {
-                            return callback() ? obj.success() : obj.error(options.errMsg);
+                            return callback(args) ? obj.success() : obj.error(options.errMsg);
                         }
                     }
                 }
-            }
-
-            if (!execTest(['*', '-'], getIntervalNumber)) { //验证任意字符的长度
-                return false;
-            }
-            if (!execTest('*', obj.getNull)) {  //验证空
-                return false;
-            }
-            if (!execTest(['zh', '-'], getIntervalNumber)) {    //验证中文长度
-                return false;
-            }
-            if (!execTest('zh', obj.getChinese)) {  //验证中文
-                return false;
-            }
-            if (!execTest(['n', '-'], getIntervalNumber)) { //验证数字长度
-                return false;
-            }
-            if (!execTest('n', obj.getNumber)) {    //验证数字
-                return false;
-            }
-            if (!execTest('r', getIntervalNumber)) {    //验证数字
-                return false;
-            }
-            if (!execTest('email', obj.getEmail)) { //验证邮箱
-                return false;
-            }
-            if (!execTest('phone', obj.getIphone)) {    //验证手机号
-                return false;
-            }
-            if (!execTest(['le', '-'], getIntervalNumber)) {    //验证长度
-                return false;
-            }
-            if (!execTest('datetime', obj.getDateTime)) {   //验证日期时间
-                return false;
-            }
-            if (!execTest('date', obj.getDate)) {   //验证日期
-                return false;
-            }
-            if (!execTest('time', obj.getTime)) {   //验证时间
-                return false;
-            }
-            if (!extendVerify()) { //扩展验证
-                return false;
             }
         } else {    //自定义正则验证
             options.dataType = eval(options.dataType);
@@ -240,11 +193,12 @@ $.extend({
         }
         //验证扩展方法
         function extendVerify() {
+            // debugger
             if (options.rechecked) { //二次验证
                 obj.getRechecked(options.current) ? obj.success() : obj.error($(options.current).attr('reErrMsg' || '两次输入不一致！'));
             }
             if (options.ajaxUrl) { //ajax校验
-                obj.getAjaxCheck(options.current) ? obj.success() : obj.error($(options.current).attr('ajaxErrMsg'));
+                obj.getAjaxCheck() ? obj.success() : obj.error($(options.current).attr('ajaxErrMsg'));
             }
             if (options.startDate != undefined || options.endDate != undefined) { // 比较日期
                 obj.getCompareDate(options.current) ? obj.success() : obj.error(options.errMsg || '日期验证失败！');
@@ -288,14 +242,8 @@ $.extend({
         } else {
             input.trigger('blur');
             select.trigger('change');
-            console.log('$(options.elem).find(".verify-error-b").length :'+ $(options.elem).find(".verify-error-b").length)
-            console.log($(options.elem).find(".verify-error-b"));
-
-//            var flag = $(options.elem).find(".verify-error-b").length > 0 ? false : true;
-
-            if ($(options.elem).find(".verify-error-b").length>0) {
+            if ($(options.elem).find(".verify-error-b").length > 0) {
                 var ele = $('.verify-error-b:first').trigger('blur');
-                console.log($('.verify-error-b:first'))
                 $('.verify-error-b:first').focus();
                 return false;
             }
