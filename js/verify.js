@@ -116,7 +116,7 @@ $.extend({
         };
         //验证
         //debugger
-        var ignore = $(options.current).attr('ignore'); //如果有表示不是必填项
+        var ignore = $(options.current).attr('ignore'); //false 必填  true：选填
         if (!(options.dataType.charAt(0) === '/')) {    //使用的是内置规则
             if (options.dataType.indexOf('-') >= 0) {  //如果有 - 则表示是要验证范围
                 return getIntervalNumber() ? extendVerify() : false;
@@ -173,7 +173,7 @@ $.extend({
                         if (!obj.getNull()) { //空
                             return obj.success();
                         } else {
-                            return callback.appaly(this,args) ? obj.success() : obj.error(options.errMsg);
+                            return callback.apply(this,args) ? obj.success() : obj.error(options.errMsg);
                         }
                     }
                 }
