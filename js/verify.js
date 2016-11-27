@@ -21,6 +21,8 @@ $.extend({
             "email": /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/, //验证邮箱
             "phone": /^13[0-9]{9}$|14[0-9]{9}|15[0-9]{9}$|18[0-9]{9}$/, //验证手机号
             "le": /^\S{" + firstNumber + "," + lastNumber + "}$/, //验证长度
+            "url": /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
+            "ip": /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
             "date": /^([1][7-9][0-9][0-9]|[2][0][0-9][0-9])([\-\.\/\:])([0][1-9]|[1][0-2])([\-\.\/\:])([0][1-9]|[1][0-9]|[2][0-9]|[3][0-1])$/g, //验证日期 yyyy-MM-dd
             "time": /^([0-1][0-9]|[2][0-3])([\-\.\/\:])([0-5][0-9])([\-\.\/\:])([0-5][0-9])$/g, //验证时间  hh:ss:mm
             "datetime": /^([1][7-9][0-9][0-9]|[2][0][0-9][0-9])([\-\.\/\:])([0][1-9]|[1][0-2])([\-\.\/\:])([0][1-9]|[1][0-9]|[2][0-9]|[3][0-1])(\s+)([0-1][0-9]|[2][0-3])([\-\.\/\:])([0-5][0-9])([\-\.\/\:])([0-5][0-9])$/g //验证时间 yyyy-MM-dd hh:ss:mm
@@ -31,7 +33,7 @@ $.extend({
                 return regObj['*'].test(value);
             },
             getRegFn: function (dataType) { //用内置类型去验证
-                // debugger
+                //debugger
                 return regObj[dataType].test(value);
             },
             getRechecked: function () { //再次验证
@@ -51,9 +53,6 @@ $.extend({
                         return false;
                     }
                 });
-            },
-            getLength: function () { //验证长度
-                return regObj["le"].test(value);
             },
             getRange : function (min,max) { //验证范围
                 return (Number(value) >= Number(min) && Number(value) <= max) || false;
@@ -116,7 +115,7 @@ $.extend({
             }
         };
         //验证
-        // debugger
+        //debugger
         var ignore = $(options.current).attr('ignore'); //如果有表示不是必填项
         if (!(options.dataType.charAt(0) === '/')) {    //使用的是内置规则
             if (options.dataType.indexOf('-') >= 0) {  //如果有 - 则表示是要验证范围
@@ -125,7 +124,7 @@ $.extend({
                 return execTest(options.dataType, obj.getRegFn,options.dataType);
             }
             function getIntervalNumber() {	//获取范围的数字
-                // debugger
+                //debugger
                 var firstNumber = options.dataType.match(/\d+/)[0]; //获取长度最小值
                 var lastNumber = options.dataType.substring(options.dataType.indexOf("-") + 1); //获取长度最大值
                 var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - firstNumber.length);	//获取验证的类型
@@ -153,7 +152,7 @@ $.extend({
 
             //执行验证
             function execTest(str, callback) {
-                // debugger
+                //debugger
                 var args = Array.prototype.slice.call(arguments,2); //截取参数
                 if (Object.prototype.toString.call(str) === '[object Array]') { //传递是一个数组
                     return showInfo();
@@ -163,37 +162,54 @@ $.extend({
 
                 //显示相关信息
                 function showInfo() {
-                    // debugger
+                    //debugger
                     if (!ignore) { //必填项
-                        return callback(args) ? obj.success() : obj.error(options.errMsg);
+                        if(!obj.getNull()){
+                            return obj.error(options.nullMsg);
+                        }else {
+                            return callback.apply(this, args) ? obj.success() : obj.error(options.errMsg);
+                        }
                     } else {
                         if (!obj.getNull()) { //空
                             return obj.success();
                         } else {
-                            return callback(args) ? obj.success() : obj.error(options.errMsg);
+                            return callback.appaly(this,args) ? obj.success() : obj.error(options.errMsg);
                         }
                     }
                 }
             }
         } else {    //自定义正则验证
+            //debugger
             options.dataType = eval(options.dataType);
+
             if (!ignore) {
                 if (!obj.getNull()) { //为空
                     return obj.error(options.nullMsg);
                 } else {
-                    return options.dataType.test(value) ? extendVerify() : obj.error(options.errMsg);
+                    if(options.dataType.test(value)){
+                        obj.success();
+                        extendVerify()
+                    }else{
+                        obj.error(options.errMsg);
+                    }
                 }
             } else {
                 if (!obj.getNull()) { //空
                     return obj.success();
                 } else {
-                    return options.dataType.test(value) ? extendVerify() : obj.error(options.errMsg);
+                    if(options.dataType.test(value)){
+                        obj.success();
+                        extendVerify()
+                    }else{
+                        obj.error(options.errMsg);
+                    }
                 }
             }
         }
+
         //验证扩展方法
         function extendVerify() {
-            // debugger
+            //debugger
             if (options.rechecked) { //二次验证
                 obj.getRechecked(options.current) ? obj.success() : obj.error($(options.current).attr('reErrMsg' || '两次输入不一致！'));
             }
