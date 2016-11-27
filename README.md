@@ -1,5 +1,5 @@
 # verify 验证表单的插件
-> 实现功能(暂时只针对input和select)
+> 实现功能(暂时只针对input和select,textarea需要单独加标记(textarea:true))
 - 支持失焦验证和提交表单两种验证方式
 - 支持二次验证，如密码和确认密码
 - 支持ajax验证，如检测用户名是否存在，同一个页面支持多个ajax验证
