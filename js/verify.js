@@ -14,10 +14,11 @@ $.extend({
         };
 
         var value = $(options.current).val().trim(); //获取当前输入的值
-        var regObj = {  //验证对象
+        var regObj = {  //内置验证规则
             "*": /[\w\W]+/, //验证空
             "zh": /.*[\u4e00-\u9fa5]+.*$/, //验证中文
             "n": /\d+/,	//验证数字
+            "str": /^[a-zA-Z][\da-zA-Z_]*$/,   //以字母开头+字母数字下划线
             "email": /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/, //验证邮箱
             "phone": /^13[0-9]{9}$|14[0-9]{9}|15[0-9]{9}$|18[0-9]{9}$/, //验证手机号
             "le": /^\S{" + firstNumber + "," + lastNumber + "}$/, //验证长度
@@ -133,6 +134,9 @@ $.extend({
                         break;
                     case 'zh':  //验证中文长度
                         regObj["le"] = new RegExp("^[\\u4e00-\\u9fa5]{" + firstNumber + "," + lastNumber + "}$");
+                        break;
+                    case 'str': // [!]只验证以字母开头 后面跟字母数字下划线
+                        regObj['le'] = new RegExp("^[a-zA-Z][\\da-zA-Z_]{"+ firstNumber + "," + lastNumber +"}$");
                         break;
                     case 'n':   //验证数字长度
                         regObj["le"] = new RegExp("^\\d{" + firstNumber + "," + lastNumber + "}$");
