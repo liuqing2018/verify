@@ -72,7 +72,7 @@ $(function () {
     
     //提交表单时执行验证
     oBtn.on('click',function(){
-        if($.isVerify()){     //$.isVerify()返回一个boolean值，用来表示是否验证通过 true：通过，false：不通过
+        if($.isVerify()){     //$.isVerify()返回一个boolean值，用来表示是否验证通过 true：通过，false：不通过   //PS anagularjs内部使用要在添加$timeout或则setTi
             
             //TODO put your code here
             

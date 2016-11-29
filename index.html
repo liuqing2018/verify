@@ -42,6 +42,7 @@
 <div class="wrap">
     <form class="form-inline"  role="form" id="myForm">
         <ul class="clearfix" >
+
             <li class="form-group col-md-12">
                 <label><i class="need"></i>用户名</label>
                 <div class="form-input">
@@ -60,6 +61,17 @@
                     <input class="form-control"  type="password" placeholder="请输入确认密码" datatype="*5-6" nullMsg="密码不能为空!" errMsg="输入的密码格式不正确" rechecked="password1" reErrMsg='两次密码必须一致'>
                 </div>
             </li>
+            <li class="form-group col-md-12">
+                <label><i class="need"></i>性别</label>
+                <div class="form-input">
+                    <select name=""  datatype="n1-3" class="form-control">
+                        <option value="">请选择</option>
+                        <option value="1">男</option>
+                        <option value="2">女</option>
+                    </select>
+                </div>
+            </li>
+
             <li class="form-group col-md-12">
                 <label><i class="need"></i>年龄</label>
                 <div class="form-input">
@@ -169,10 +181,14 @@ $(function () {
     */
 
     oBtn.on('click',function(){
+//        console.log($.isVerify())
+
         if($.isVerify()){
             console.log('验证通过...');
             //put your code here
             //$('#myForm').submit();
+        }else{
+            console.warn('没有通过验证!');
         }
     })
 })

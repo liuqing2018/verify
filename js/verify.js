@@ -21,8 +21,8 @@ $.extend({
             "email": /^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/, //验证邮箱
             "phone": /^13[0-9]{9}$|14[0-9]{9}|15[0-9]{9}$|18[0-9]{9}$/, //验证手机号
             "le": /^\S{" + firstNumber + "," + lastNumber + "}$/, //验证长度
-            "url": /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/,
-            "ip": /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
+            "url": /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/, //验证url
+            "ip": /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,   //验证IP地址
             "date": /^([1][7-9][0-9][0-9]|[2][0][0-9][0-9])([\-\.\/\:])([0][1-9]|[1][0-2])([\-\.\/\:])([0][1-9]|[1][0-9]|[2][0-9]|[3][0-1])$/g, //验证日期 yyyy-MM-dd
             "time": /^([0-1][0-9]|[2][0-3])([\-\.\/\:])([0-5][0-9])([\-\.\/\:])([0-5][0-9])$/g, //验证时间  hh:ss:mm
             "datetime": /^([1][7-9][0-9][0-9]|[2][0][0-9][0-9])([\-\.\/\:])([0][1-9]|[1][0-2])([\-\.\/\:])([0][1-9]|[1][0-9]|[2][0-9]|[3][0-1])(\s+)([0-1][0-9]|[2][0-3])([\-\.\/\:])([0-5][0-9])([\-\.\/\:])([0-5][0-9])$/g //验证时间 yyyy-MM-dd hh:ss:mm
@@ -33,7 +33,6 @@ $.extend({
                 return regObj['*'].test(value);
             },
             getRegFn: function (dataType) { //用内置类型去验证
-                //debugger;
                 return regObj[dataType].test(value);
             },
             getRechecked: function () { //再次验证
@@ -115,7 +114,6 @@ $.extend({
             }
         };
         //验证
-        //debugger;
         var ignore = $(options.current).attr('ignore'); //false 必填  true：选填
         if (!(options.dataType.charAt(0) === '/')) {    //使用的是内置规则
             if (options.dataType.indexOf('-') >= 0) {  //如果有 - 则表示是要验证范围
@@ -124,7 +122,6 @@ $.extend({
                 return execTest(options.dataType, obj.getRegFn,options.dataType);
             }
             function getIntervalNumber() {	//获取范围的数字
-                //debugger;
                 var firstNumber = options.dataType.match(/\d+/)[0]; //获取长度最小值
                 var lastNumber = options.dataType.substring(options.dataType.indexOf("-") + 1); //获取长度最大值
                 var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - firstNumber.length);	//获取验证的类型
@@ -152,7 +149,6 @@ $.extend({
 
             //执行验证
             function execTest(str, callback) {
-                //debugger;
                 var args = Array.prototype.slice.call(arguments,2); //截取参数
                 if (Object.prototype.toString.call(str) === '[object Array]') { //传递是一个数组
                     return showInfo();
@@ -169,7 +165,6 @@ $.extend({
                 }
             }
         } else {    //自定义正则验证
-            //debugger;
             options.dataType = eval(options.dataType);
             if (!obj.getNull()) { //为空
                 return !ignore ? obj.error(options.nullMsg): obj.success();
@@ -180,7 +175,6 @@ $.extend({
 
         //验证扩展方法
         function extendVerify() {
-            //debugger;
             if (options.rechecked) { //二次验证
                 return obj.getRechecked(options.current) ? obj.success() : obj.error($(options.current).attr('reErrMsg' || '两次输入不一致！'));
             }
@@ -197,24 +191,23 @@ $.extend({
         this.params.type = true;
         return this.initVerify(this.params);
     },
-    clearVerifyStatus: function (elem) { //清除状态
-        elem = elem || document;
-        $(elem).find(".verify-error").remove();
-        $(elem).find(".verify-success").removeClass();
-        $(elem).find("input").removeClass('verify-error-b');
+    clearVerifyStatus: function () { //清除状态
+        var parentElem = $(this.params.elem);
+        parentElem.find(".verify-error").remove();
+        parentElem.find(".verify-success").removeClass('verify-success');
+        parentElem.find("verify-error-b").removeClass('verify-error-b');
     },
     initVerify: function (params) { //初始化验证方法
         var params = params || {};
-        this.params = params;
         var elem = params.elem || document;
         var options = {
-            elem: elem,  //要验证的表单元素
-            type: params.type || false, //false：初始化 true: 验证全部
-            textarea: params.textarea || false,	//false表示不验证textarea
+            elem: elem,  //要验证的表单  默认document
+            type: params.type || false, //默认false  false：初始化 true: 验证全部
+            textarea: params.textarea || false,	//默认false  false:表示不验证textarea
             errorElePos: params.errorElePos || false, //错误提示显示的位置 true为右侧，false为上侧
             isAll : params.isAll || false    //默认全部验证 true: 逐个验证  false：全部验证
         };
-
+        this.params = options;
         var input, select;
         input = $(options.elem).find(options.textarea ? "input[datatype],textarea[datatype]" : "input[datatype]");	//是否验证textarea
         select = $(options.elem).find("select[datatype]");
@@ -222,25 +215,30 @@ $.extend({
             input.unbind("blur", fn); //移除input的blur事件
             select.unbind("change", fn); //移除select的change事件
             var fn = function () {
-                return $.verify({current: this, errorElePos: options.errorElePos}); //验证当前项
+                return $.verify({current: this, errorElePos: options.errorElePos});
             };
             input.blur(fn); //绑定blur事件
             select.change(fn); //绑定change事件
         } else {
-            if(options.isAll){
+            if(options.isAll){  //逐条验证
                 input.each(function (index ,item) {
-                    return $(item).triggerHandler('blur');
+                    return $(item).trigger('blur');
                 });
                 select.each(function (index ,item) {
-                    return $(item).triggerHandler('change');
+                    return $(item).trigger('change');
                 });
             }else{
                 input.trigger('blur');
                 select.trigger('change');
             }
             if ($(options.elem).find(".verify-error-b").length > 0) {
-                var ele = $('.verify-error-b:first').trigger('blur');
-                $('.verify-error-b:first').focus();
+                var elem = $('.verify-error-b:first').get(0);
+                if(elem.nodeName.toLowerCase() == 'select'){
+                    $(elem).trigger('change');
+                }else {
+                    elem.focus();
+                    $(elem).trigger('blur');
+                }
                 return false;
             }
             return true;
