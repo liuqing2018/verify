@@ -1,15 +1,14 @@
-function VerifyForm (params){
-    this.initVerify(params);
+function VForm (params){
+    this.initVerify(params);    //初始化验证
 }
-VerifyForm.prototype.verify = function (params) {
+VForm.prototype.verify = function (params) {
     var _this = this;
     var options = {
         "current": params.current,  //当前元素
         "dataType": $(params.current).attr("dataType"), //验证规则
         "errMsg": $(params.current).attr("errMsg"),  //验证失败的提示信息
-        "nullMsg": $(params.current).attr("nullMsg") || '必填项不能为空!'  //为空时的提示信息
+        "nullMsg": $(params.current).attr("nullMsg") || '必填项不能为空!' //为空时的提示信息
     };
-    var value = $(options.current).val().trim(); //获取当前输入的值
     var regObj = {  //内置验证规则
         "*": /[\w\W]+/, //验证空
         "zh": /[\u4e00-\u9fa5]+/,  //验证中文
@@ -25,23 +24,23 @@ VerifyForm.prototype.verify = function (params) {
         "datetime": /^([1][7-9][0-9][0-9]|[2][0][0-9][0-9])([\-\.\/\:])([0][1-9]|[1][0-2])([\-\.\/\:])([0][1-9]|[1][0-9]|[2][0-9]|[3][0-1])(\s+)([0-1][0-9]|[2][0-3])([\-\.\/\:])([0-5][0-9])([\-\.\/\:])([0-5][0-9])$/g //验证时间 yyyy-MM-dd hh:ss:mm
     };
 
-    var obj = { //验证对象
+    var regFn = { //验证的方法
         getNull: function () { //验证空
-            return regObj['*'].test(value);
+            return regObj['*'].test($(options.current).val());
         },
         getRegFn: function (dataType) { //用内置类型去验证
-            return regObj[dataType].test(value);
+            return regObj[dataType].test($(options.current).val());
         },
         getRechecked: function () { //再次验证
-            var recheckVal = $('input[name=\'' + $(params.current).attr("rechecked") + '\']').val(); //要比较的值
-            return recheckVal == value;
+            var recheckVal = $('[name=\'' + $(params.current).attr("rechecked") + '\']').val(); //要比较的值
+            return recheckVal == $(options.current).val();
         },
         getAjaxCheck: function () { //ajax验证
             var name = $(options.current).attr('name') || 'params';
             $.ajax({
                 type: "GET",
                 url: $(params.current).attr("ajaxUrl"),
-                data: name + "=" + value,
+                data: name + "=" + $(options.current).val(),
                 success: function (data) {
                     return data.status == 0 ? true : false;
                 },
@@ -51,29 +50,20 @@ VerifyForm.prototype.verify = function (params) {
             });
         },
         getRange: function (min, max) { //验证范围
-            return (Number(value) >= Number(min) && Number(value) <= max) || false;
+            return (Number($(options.current).val()) >= Number(min) && Number($(options.current).val()) <= max) || false;
         },
         getCompareDate: function () { //比较日期
             var oStartDate = $(options.current).attr('startDate'); //开始日期指定的结束对象
             var oEndDate = $(options.current).attr('endDate'); //结束日期指定的开始对象
-            var flag = true;
-            var msg = '';
+            var value = $(options.current).val();
             if (oStartDate != undefined && oStartDate != '') { //有开始日期
-                flag = (new Date().getTime() - Date.parse($(options.current).val()) >= 0) ? true : false;
-                var endDate = $("input[name='" + oStartDate + "']"); //查找对应的结束日期
-                if (endDate == null) { //开始日期startDate="name", 通过input[name='name']找不到元素
-                    flag = false;
-                }
+                var endDate = $("[name='" + oStartDate + "']"); //查找对应的结束日期
+                return (new Date().getTime() - Date.parse(value) >= 0) ? true : (endDate == null ? false : true);
             }
             if (oEndDate != undefined && oEndDate != '') { //有结束日期
-                var startDate = $("input[name='" + oEndDate + "']");
-                if (startDate != null) {
-                    flag = ((Date.parse(value) - Date.parse(startDate.val()) >= 0) && (new Date().getTime() - Date.parse(value) >= 0)) ? true : false;
-                } else {
-                    flag = false;
-                }
+                var startDate = $("[name='" + oEndDate + "']");
+                return ((startDate != null) && (Date.parse(value) - Date.parse(startDate.val()) >= 0) && (new Date().getTime() - Date.parse(value) >= 0)) ? true : false;
             }
-            return flag;
         },
         success: function (type) { //验证成功
             if (type) { //成功
@@ -88,7 +78,7 @@ VerifyForm.prototype.verify = function (params) {
             var msg = msg || '验证失败！';
             $(options.current).removeClass('verify-success').addClass('verify-error-b'); //清除成功提示样式
             $(_this.options.elem).find(".verify-error").remove();
-            console.log('_this.options.errorElePos'+ _this.options.errorElePos)
+
             var vClass = _this.options.errorElePos ? 'verify-error verify-right' : 'verify-error'; //默认在上面  true表示右边
             var elem = '<div class="' + vClass + '">' + msg + '<div class="verify-error-icon"></div></div>';
             if ($(options.current).parent().css('position') == '' || $(options.current).parent().css('position') == 'static') {
@@ -101,7 +91,7 @@ VerifyForm.prototype.verify = function (params) {
                 if (elemH < errorEleH) { //如果输入框的高度没有错误提示框高
                     elemH = errorEleH;
                 }
-                var elemL = $(options.current).position().left; //获取当前输入框的宽度
+                var elemL = $(options.current).position().left; //获取当前输入框的left
                 $(options.current).siblings('.verify-error').css({'top': -elemH + 'px', 'left': -(elemL) + 'px'});
             } else {
                 var elemW = $(options.current).outerWidth(); //获取当前输入框的宽度
@@ -116,7 +106,7 @@ VerifyForm.prototype.verify = function (params) {
         if (options.dataType.indexOf('-') >= 0) {  //如果有 - 则表示是要验证范围
             return getIntervalNumber() ? extendVerify() : false;
         } else {
-            return execTest(options.dataType, obj.getRegFn, options.dataType);
+            return execTest(options.dataType, regFn.getRegFn, options.dataType);
         }
         function getIntervalNumber() {	//获取范围的数字
             var firstNumber = options.dataType.match(/\d+/)[0]; //获取长度最小值
@@ -124,69 +114,69 @@ VerifyForm.prototype.verify = function (params) {
             var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - firstNumber.length);	//获取验证的类型
 
             //重新构建正则
-            if(prefix == 'r'){
-                return execTest([prefix, '-'], obj.getRange, Number(firstNumber), Number(lastNumber));
+            if(prefix == 'r'){  //验证数字的范围
+                return execTest([prefix, '-'], regFn.getRange, Number(firstNumber), Number(lastNumber));
             }else{
-                var regPrefix = regObj[prefix].toString().slice(1,regObj[prefix].toString().length-2);
+                var regPrefix = regObj[prefix].toString().slice(1,regObj[prefix].toString().length-2);  //取regObj的正则
                 regObj["le"] = eval('/^' + regPrefix + '{' + firstNumber + ',' + lastNumber + '}$/');
-                return execTest([prefix, '-'], obj.getRegFn, 'le');  //返回的是true或则false
+                return execTest([prefix, '-'], regFn.getRegFn, 'le');  //返回的是true或则false
             }
         }
 
-        //执行验证
+        //执行验证 并返回验证结果
         function execTest(str, callback) {
             var args = Array.prototype.slice.call(arguments, 2); //截取参数
             if (Object.prototype.toString.call(str) === '[object Array]') { //传递是一个数组
                 return showInfo();
             } else { //传递是一个字符串 可以直接的调用相对的方法
-                return (options.dataType.indexOf(str) >= 0) ? showInfo() : false;    //如果匹配了传递的字符串 就用用callback 否则就return true 继续查找
+                return (options.dataType.indexOf(str) >= 0) ? showInfo() : false;    //如果匹配了传递的字符串 就用用callback 否则就return false
             }
             //显示相关信息
             function showInfo() {
-                if (!obj.getNull()) {
-                    return !ignore ? obj.error(options.nullMsg) : obj.success();
+                if (!regFn.getNull()) {
+                    return !ignore ? regFn.error(options.nullMsg) : regFn.success();
                 } else {
-                    return callback.apply(this, args) ? obj.success() : obj.error(options.errMsg);
+                    return callback.apply(this, args) ? regFn.success() : regFn.error(options.errMsg);
                 }
             }
         }
     } else {    //自定义正则验证
         options.dataType = eval(options.dataType);
-        if (!obj.getNull()) { //为空
-            return !ignore ? obj.error(options.nullMsg) : obj.success();
+        if (!regFn.getNull()) { //为空
+            return !ignore ? regFn.error(options.nullMsg) : regFn.success();
         } else {
-            return options.dataType.test(value) ? extendVerify() : obj.error(options.errMsg);
+            return options.dataType.test($(options.current).val()) ? extendVerify() : regFn.error(options.errMsg);
         }
     }
 
     //验证扩展方法
     function extendVerify() {
         if ($(params.current).attr("rechecked")) { //二次验证
-            return obj.getRechecked(options.current) ? obj.success() : obj.error($(options.current).attr('reErrMsg' || '两次输入不一致！'));
+            return regFn.getRechecked(options.current) ? regFn.success() : regFn.error($(options.current).attr('reErrMsg' || '两次输入不一致！'));
         }
         if ($(params.current).attr("ajaxUrl")) { //ajax校验
-            return obj.getAjaxCheck() ? obj.success() : obj.error($(options.current).attr('ajaxErrMsg'));
+            return regFn.getAjaxCheck() ? regFn.success() : regFn.error($(options.current).attr('ajaxErrMsg'));
         }
         if ($(params.current).attr("startDate") != undefined || $(params.current).attr("endDate") != undefined) { // 比较日期
-            return obj.getCompareDate() ? obj.success() : obj.error(options.errMsg || '日期验证失败！');
+            return regFn.getCompareDate() ? regFn.success() : regFn.error(options.errMsg || '日期验证失败！');
         }
-        return obj.success()
+        return regFn.success()
     }
 };
 
-VerifyForm.prototype.isVerify = function () { //验证全部
+VForm.prototype.isVerify = function () { //验证全部
     this.options.type = true;
     return this.initVerify(this.options);
 };
 
-VerifyForm.prototype.clearVerifyStatus = function () { //清除状态
+VForm.prototype.clearVerifyStatus = function () { //清除状态
     var parentElem = $(this.options.elem);
     parentElem.find(".verify-error").remove();
     parentElem.find(".verify-success").removeClass('verify-success');
     parentElem.find("verify-error-b").removeClass('verify-error-b');
 };
 
-VerifyForm.prototype.initVerify = function (params) { //初始化验证方法
+VForm.prototype.initVerify = function (params) { //初始化验证方法
     this.options = {
         elem: params.elem || document,  //要验证的表单  默认document
         type: params.type || false, //默认false  false：初始化 true: 验证全部
@@ -218,7 +208,6 @@ VerifyForm.prototype.initVerify = function (params) { //初始化验证方法
             input.trigger('blur');
             select.trigger('change');
         }
-        console.log(this.options.elem)
         if ($(this.options.elem).find(".verify-error-b").length > 0) {
             var elem = $(this.options.elem).find('.verify-error-b:first').get(0);
             if (elem.nodeName.toLowerCase() == 'select') {

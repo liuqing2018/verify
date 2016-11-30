@@ -64,8 +64,8 @@
             <li class="form-group col-md-12">
                 <label><i class="need"></i>性别</label>
                 <div class="form-input">
-                    <select name=""  datatype="n1-3" class="form-control">
-                        <option value="">请选择</option>
+                    <select name="test"  datatype="n1-3" class="form-control">
+                        <option value="9">请选择</option>
                         <option value="1">男</option>
                         <option value="2">女</option>
                     </select>
@@ -166,6 +166,9 @@
 <script src="js/verify.js"></script>
 <script type="text/javascript">
 $(function () {
+    console.log($('[name="test"]').val())
+
+
     var oForm = $('.form-inline');
     var oBtn = $('#btnAdd');    //提交按钮
     $.initVerify({      //初始化表单，即添加事件绑定，以便失焦时验证数据

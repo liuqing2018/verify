@@ -195,7 +195,7 @@ $(function () {
     var oForm = $('.form-inline');
     var oBtn = $('#btnAdd');    //提交按钮
 
-    var vfrm1 = new VerifyForm({      //初始化表单，即添加事件绑定，以便失焦时验证数据
+    var vfrm1 = new VForm({      //初始化表单，即添加事件绑定，以便失焦时验证数据
         elem: oForm,         //要验证元素的区域
         type: false,        //false:初始化    true:全部验证
         errorElePos: true,     // true： 错误信息在右边，false：错误信息在上边
@@ -228,7 +228,7 @@ $(function () {
     })
 
     var form2 = $('#form2');
-    var vfrm2 = new VerifyForm({      //初始化表单，即添加事件绑定，以便失焦时验证数据
+    var vfrm2 = new VForm({      //初始化表单，即添加事件绑定，以便失焦时验证数据
         elem: form2,         //要验证元素的区域
         type: false,        //false:初始化    true:全部验证
         errorElePos: true,     // true： 错误信息在右边，false：错误信息在上边
