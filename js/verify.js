@@ -1,8 +1,7 @@
-function VForm (params){
-    this.initVerify(params);    //初始化验证
+function VForm(params) {
+    params && this.initVerify(params);    //初始化验证
 }
 VForm.prototype.verify = function (params) {
-    var _this = this;
     var options = {
         "current": params.current,  //当前元素
         "dataType": $(params.current).attr("dataType"), //验证规则
@@ -24,6 +23,7 @@ VForm.prototype.verify = function (params) {
         "datetime": /^([1][7-9][0-9][0-9]|[2][0][0-9][0-9])([\-\.\/\:])([0][1-9]|[1][0-2])([\-\.\/\:])([0][1-9]|[1][0-9]|[2][0-9]|[3][0-1])(\s+)([0-1][0-9]|[2][0-3])([\-\.\/\:])([0-5][0-9])([\-\.\/\:])([0-5][0-9])$/g //验证时间 yyyy-MM-dd hh:ss:mm
     };
 
+    var _this = this;
     var regFn = { //验证的方法
         getNull: function () { //验证空
             return regObj['*'].test($(options.current).val());
@@ -66,65 +66,55 @@ VForm.prototype.verify = function (params) {
             }
         },
         success: function (type) { //验证成功
-            if (type) { //成功
-                $(options.current).removeClass('verify-success').removeClass('verify-error-b'); //添加success提示样式
-            } else {
-                $(options.current).addClass('verify-success').removeClass('verify-error-b'); //添加error提示样式
-            }
+            $(options.current).removeClass('verify-success').removeClass('verify-error-b'); //添加success提示样式
             $(_this.options.elem).find(".verify-error").remove();
             return true;
         },
         error: function (msg) { //验证失败
-            var msg = msg || '验证失败！';
             $(options.current).removeClass('verify-success').addClass('verify-error-b'); //清除成功提示样式
-            $(_this.options.elem).find(".verify-error").remove();
-
-            var vClass = _this.options.errorElePos ? 'verify-error verify-right' : 'verify-error'; //默认在上面  true表示右边
-            var elem = '<div class="' + vClass + '">' + msg + '<div class="verify-error-icon"></div></div>';
-            if ($(options.current).parent().css('position') == '' || $(options.current).parent().css('position') == 'static') {
-                $(options.current).parent().css('position', 'relative'); //如果父级没有定位，则添加一个相对定位，防止显示错位
-            }
+            $(_this.options.elem).find(".verify-error").remove();   //清除错误提示
+            var placement = _this.options.placement;   //错误提示显示的位置 [top| right | bottom] 默认为top: 在元素上方显示错误信息
+            var vClass = placement == 'top' ? 'verify-error' : (placement == 'right' ? 'verify-error verify-right' : 'verify-error verify-bottom' );
+            var elem = '<div class="' + vClass + '">' + (msg || '验证失败！') + '<div class="verify-error-icon"></div></div>';
             $(options.current).parent().append(elem); //追加错误提示标签
-            if (!_this.options.errorElePos) { //在输入框上方显示错误信息
-                var elemH = $(options.current).outerHeight() //+ $('.verify-error-icon').outerHeight();   //获取当前输入框的高度
-                var errorEleH = $(options.current).siblings('.verify-error').outerHeight(); //错误信息框的高度
-                if (elemH < errorEleH) { //如果输入框的高度没有错误提示框高
-                    elemH = errorEleH;
-                }
-                var elemL = $(options.current).position().left; //获取当前输入框的left
-                $(options.current).siblings('.verify-error').css({'top': -elemH + 'px', 'left': -(elemL) + 'px'});
+
+            var elemPos = $(options.current).position();  //获取当前元素的位置
+            var elemH = $(options.current).outerHeight();   //获取当前元素的高度
+            if (placement != 'right') {     //错误提示在上方或则下方
+                var vIconHeight = parseInt($('.verify-error-icon').css(placement == 'top' ? 'borderTopWidth' : 'borderBottomWidth'));   //提示信息方向的高度
+                var iTop = placement == 'top' ? -($('.verify-error').height() + vIconHeight) : (elemH + vIconHeight + elemPos.top);     //上方或则下方
+                $(options.current).siblings('.verify-error').css({'top': iTop + 'px', 'left': (elemPos.left) + 'px'});
             } else {
-                var elemW = $(options.current).outerWidth(); //获取当前输入框的宽度
-                $(options.current).siblings('.verify-error').css({'left': elemW + 'px'});
+                $(options.current).siblings('.verify-error').css({
+                    'top': (elemPos.top) + 'px',
+                    'left': ($(options.current).outerWidth() + elemPos.left) + 'px'
+                });
             }
             return false;
         }
     };
     //验证
-    var ignore = $(options.current).attr('ignore'); //false 必填  true：选填
+    var ignore = $(options.current).attr('ignore'); //ignore有值表示必填否则为选填
     if (!(options.dataType.charAt(0) === '/')) {    //使用的是内置规则
         if (options.dataType.indexOf('-') >= 0) {  //如果有 - 则表示是要验证范围
-            return getIntervalNumber() ? extendVerify() : false;
+            return getIntervalNumber() ? extendVerify() : false;    //先验证范围，然后扩展验证
         } else {
             return execTest(options.dataType, regFn.getRegFn, options.dataType);
         }
-        function getIntervalNumber() {	//获取范围的数字
+        function getIntervalNumber() {	//获取范围的数字，重新构建regObj["le"]的规则
             var firstNumber = options.dataType.match(/\d+/)[0]; //获取长度最小值
             var lastNumber = options.dataType.substring(options.dataType.indexOf("-") + 1); //获取长度最大值
             var prefix = options.dataType.substring(0, options.dataType.indexOf("-") - firstNumber.length);	//获取验证的类型
-
-            //重新构建正则
-            if(prefix == 'r'){  //验证数字的范围
+            if (prefix == 'r') {  //验证数字的范围
                 return execTest([prefix, '-'], regFn.getRange, Number(firstNumber), Number(lastNumber));
-            }else{
-                var regPrefix = regObj[prefix].toString().slice(1,regObj[prefix].toString().length-2);  //取regObj的正则
+            } else {
+                var regPrefix = regObj[prefix].toString().slice(1, regObj[prefix].toString().length - 2);  //取regObj的正则
                 regObj["le"] = eval('/^' + regPrefix + '{' + firstNumber + ',' + lastNumber + '}$/');
                 return execTest([prefix, '-'], regFn.getRegFn, 'le');  //返回的是true或则false
             }
         }
 
-        //执行验证 并返回验证结果
-        function execTest(str, callback) {
+        function execTest(str, callback) {  //执行验证 并返回验证结果
             var args = Array.prototype.slice.call(arguments, 2); //截取参数
             if (Object.prototype.toString.call(str) === '[object Array]') { //传递是一个数组
                 return showInfo();
@@ -164,7 +154,7 @@ VForm.prototype.verify = function (params) {
     }
 };
 
-VForm.prototype.isVerify = function () { //验证全部
+VForm.prototype.isVerify = function () { //验证全部 返回一个boolean值
     this.options.type = true;
     return this.initVerify(this.options);
 };
@@ -177,12 +167,16 @@ VForm.prototype.clearVerifyStatus = function () { //清除状态
 };
 
 VForm.prototype.initVerify = function (params) { //初始化验证方法
+    var oForm;
+    if (typeof params == 'string') {  //如果传递的是一个字符串 就当做表单id处理
+        oForm = $('#' + params).length > 0 ? $('#' + params) : '';
+    }
     this.options = {
-        elem: params.elem || document,  //要验证的表单  默认document
-        type: params.type || false, //默认false  false：初始化 true: 验证全部
-        textarea: params.textarea || false,	//默认false  false:表示不验证textarea
-        errorElePos: params.errorElePos || false, //错误提示显示的位置 true为右侧，false为上侧
-        isAll: params.isAll || false    //默认全部验证 true: 逐个验证  false：全部验证
+        elem: params.elem || oForm || document,  //选填 要验证的范围， 默认document
+        type: params.type || false, //程序内部使用 选填项目 [false：初始化 true: 验证全部] 默认false
+        textarea: params.textarea || false,	//选填，如果要验证的表单范围内有textarea，请将该项设置为true ,默认false表示不验证textarea
+        placement: params.placement || 'top', //错误提示显示的位置  选填 [top| right | bottom] 默认为top: 在元素上方显示错误信息
+        skip: params.skip || false    //选填 [true|false] 默认为false 表示验证全部  true：验证一条失败后不再继续
     };
     var input, select;
     input = $(this.options.elem).find(this.options.textarea ? "input[datatype],textarea[datatype]" : "input[datatype]");	//是否验证textarea
@@ -192,12 +186,12 @@ VForm.prototype.initVerify = function (params) { //初始化验证方法
         select.unbind("change", fn); //移除select的change事件
         var This = this;
         var fn = function () {
-            return This.verify({current: this, errorElePos: This.options.errorElePos});
+            return This.verify({current: this, placement: This.options.placement});
         };
         input.blur(fn); //绑定blur事件
         select.change(fn); //绑定change事件
     } else {
-        if (this.options.isAll) {  //逐条验证
+        if (this.options.skip) {  //逐条验证
             input.each(function (index, item) {
                 return $(item).trigger('blur');
             });

@@ -5,12 +5,12 @@
 .verify-error {
     position: absolute;
     top: 0;
-    display: inline-block;
     float: none;
     min-width: 100px;
     padding: 5px 10px;
     margin:0;
     white-space:nowrap;
+    word-break: break-all;
     font-size: 12px;
     font-weight: normal;
     line-height: 20px;
@@ -59,13 +59,12 @@
 }
 
 .verify-bottom .verify-error-icon{
-    top: -5px;
-    left: 10px; /*-5*/
-    border-top: 5px solid transparent ;
+    top: -2px;
+    left: 10px;
+    border-top: none;
     border-right: 5px solid transparent ;
     border-bottom: 5px solid rgba(0,0,0,0.7);
     border-left: 5px solid transparent ;
-    border-left: none;
     transform: translateY(-50%) ;
     -webkit-transform: translateY(-50%) ;
     -moz-transform: translateY(-50%) ;

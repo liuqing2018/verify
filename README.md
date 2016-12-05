@@ -2,15 +2,16 @@
 > 实现功能(暂时只针对input和select,textarea需要单独加标记(textarea:true))
 - 支持失焦验证和提交表单两种验证方式
 - 支持二次验证，如密码和确认密码
-- 支持ajax验证，如检测用户名是否存在，同一个页面支持多个ajax验证
-- 支持开始时间和结束时间比较
+- 支持ajax验证，如检测用户名是否存在（同一个页面支持多个ajax验证）
+- 支持开始时间和结束时间比较（同一个页面支持多组时间比较）
 - 支持必填项和选填项校验
-- 支持验证全部和逐条验证
-- 支持在元素上方边或则右边显示错误信息
+- 支持验证全部和逐条验证（验证一条出错了，是否继续验证）
+- 支持在元素[上|右|下]面显示错误信息
+- 支持在同一个页面上，多组表单域单独验证
 
 ### 使用示例
 ``````
-$.initVerify(); //简单的逻辑只要调用这一句话即可
+var vf = new VForm('frmId');    //简单的逻辑只要调用这一句话 把要验证的范围传入即可
 ``````
 
 ### 使用方法
@@ -35,16 +36,16 @@ $.initVerify(); //简单的逻辑只要调用这一句话即可
              "*":  验证空
              "zh": 验证中文
              "n":  验证数字
-             "r":   "验证数字的范围"
-              'str': "[!]只验证以字母开头 后面跟字母数字下划线"
+             "r":   "验证数字的范围"   //例如 r1-100表示 取值的范围是1-100之间的数字
+             'str': "[!]只验证以字母开头 后面跟字母数字下划线"
              "email":  验证邮箱
              "phone":  验证手机号
-             "le": 验证长度
              "url": 验证url地址
              "ip": 验证ip地址
              "date": 简单验证日期 yyyy-MM-dd
              "time": 简单验证时间  hh:ss:mm
-             "datetime": 简单验证日期时间
+             "datetime": 简单验证日期时间 
+             其中 [*,zh n,r,str]都可以结合横杠来用 ，例如 *1-20 表示1-20位任意的字符  n1-20 表示1-20位的数字
 - nullMsg：string    //验证项为空时候的提示信息
 - errMsg：strinig    //验证项不符合规则的时候提示信息
 - ajaxUrl：url       //验证对象的地址
@@ -53,7 +54,7 @@ $.initVerify(); //简单的逻辑只要调用这一句话即可
 - reErrMsg : string      //二次验证失败的提示信息，要结合rechecked使用，否则无效
 - startDate : eleName    //eleName 要对应endDate元素的name
 - endDate : eleName      //eleName 要对应startDate元素的name
-- ignore ： ignore  // 添加该属性时表示选填 否则为必填
+- ignore ： ignore  // ignore有值表示必填否则为选填
 
 > 3.javascript代码里的逻辑控制
 
@@ -62,18 +63,31 @@ $(function () {
     //初始化验证
     var oForm = $('.form-inline');      //要验证的表单
     var oBtn = $('#btnAdd');    //提交按钮
-    $.initVerify({      //初始化表单，即添加事件绑定，以便失焦时验证数据
-        elem: oForm,          // 可选：要验证元素的表单 不填为document
-        errorElePos: true,     //可选：默认为false ,true： 错误信息在右边，false：错误信息在上边
-        textarea: false,	//可选：默认为false表示不验证textarea true：验证
-        isAll : false    //可选：默认false  true: 逐个验证  false：全部验证
+    
+    //方式一
+    var vf = VForm('frmId');    //frmId为要验证的表单id
+    
+    //方式二 
+    var vf = VForm({
+        elem: oForm,         //要验证元素的区域 默认document
+        placement: 'bottom',    //错误提示显示的位置 [| right | bottom] 默认为top: 在元素上方显示错误信息
+        textarea:true,      //是否要验证textarea  默认不验证
+        skip : false    //选填 [true|false] 默认为false 表示验证全部  true：验证一条失败后不再继续
     });
 
-    elem: elem,  //要验证的表单元素
+    //方式三
+    var vf = new VForm();
+    vf.initVerify({
+        elem: oForm,         //要验证元素的区域 默认document
+        placement: 'bottom',    //错误提示显示的位置 [| right | bottom] 默认为top: 在元素上方显示错误信息
+        textarea:true,      //是否要验证textarea  默认不验证
+        skip : false    //选填 [true|false] 默认为false 表示验证全部  true：验证一条失败后不再继续
+    });
     
+
     //提交表单时执行验证
     oBtn.on('click',function(){
-        if($.isVerify()){     //$.isVerify()返回一个boolean值，用来表示是否验证通过 true：通过，false：不通过   //PS anagularjs内部使用要在添加$timeout或则setTi
+        if(vf.isVerify()){     //vf.isVerify()返回一个boolean值，用来表示是否验证通过 true：通过，false：不通过  
             
             //TODO put your code here
             
@@ -82,9 +96,10 @@ $(function () {
     })
     
     /*
-    $.isVerify({
+    
+    vf.isVerify({
         elem: oForm,         //要验证元素的表单 不填为document
-        errorElePos: true,     //默认为false true： 错误信息在右边，false：错误信息在上边
+        placement: true,     //错误提示显示的位置 [top| right | bottom] 默认为top: 在元素上方显示错误信息
     })
     
     */
@@ -95,14 +110,13 @@ $(function () {
 > 1.提交时验证表单
 
 ```
-    var formElem = $('#myForm');    //表单
     var oBtn = $('#btnAdd');    //提交按钮
     
     //首先要初始化表单
-    $.initVerify(formElem);   //给formElem表单下面的元绑事件   
+    var vf = new Vform('myForm');   //给formElem表单下面的元绑事件   
     
     oBtn.on('click',function(){
-        if($.isVerify()){
+        if(vf.isVerify()){
           //通过验证
             $('#myForm').submit();  //也可以走ajax请求
         }else{
